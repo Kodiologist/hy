@@ -147,7 +147,10 @@ class HyCompile(codeop.Compile):
         sys.last_traceback = getattr(sys.last_traceback, "tb_next", sys.last_traceback)
         self.locals["_hy_last_traceback"] = sys.last_traceback
 
-    def __call__(self, source, filename="<input>", symbol="single"):
+    def __call__(self, source, filename="<input>", symbol=None):
+        symbol = "exec"
+          # This parameter is required by `codeop.Compile`, but we
+          # ignore it in favor of always using "exec".
 
         if source == "pass":
             # We need to return a no-op to signal that no more input is needed.
@@ -159,8 +162,6 @@ class HyCompile(codeop.Compile):
         self._cache(source, name)
 
         try:
-            root_ast = ast.Interactive if symbol == "single" else ast.Module
-
             # Our compiler doesn't correspond to a real, fixed source file, so
             # we need to [re]set these.
             self.hy_compiler.filename = name
@@ -173,7 +174,7 @@ class HyCompile(codeop.Compile):
             exec_ast, eval_ast = hy_compile(
                 hy_ast,
                 self.module,
-                root=root_ast,
+                root=ast.Module,
                 get_expr=True,
                 compiler=self.hy_compiler,
                 filename=name,
