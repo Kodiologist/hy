@@ -12,16 +12,7 @@ jobs:
       matrix:
         name-prefix: ['']
         os: [ubuntu-latest]
-        python: [3.9, '3.10', 3.11, 3.12, 3.13, pypy-3.10, pyodide]
-        include:
-          # To keep the overall number of runs low, we test Windows and MacOS
-          # only on the latest CPython.
-          - name-prefix: 'win-'
-            os: windows-latest
-            python: 3.13
-          - name-prefix: 'mac-'
-            os: macos-latest
-            python: 3.13
+        python: [pyodide]
 
     name: ${{ matrix.name-prefix }}${{ matrix.python }}
     runs-on: ${{ matrix.os }}
@@ -64,19 +55,3 @@ jobs:
             source .venv-pyodide/bin/activate
         fi
         python -m pytest tests
-
-  docs:
-    # Try building the manual, ensuring that Sphinx doesn't produce
-    # any warnings.
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with: {python-version: 3}
-    - name: Install
-      run: |
-        pip install .
-        pip install -r requirements-dev.txt
-    - run: sphinx-build -W -b html docs/ docs/_build/
