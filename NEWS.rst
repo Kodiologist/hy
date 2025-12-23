@@ -10,6 +10,7 @@ Supports Python 3.x – Python 3.y
 New Features
 ------------------------------
 * `setv` now supports chained assignment with `:chain`.
+* `hy.inspect` extends Hy compatibility of python's `inspect` module.
 
 1.1.0 ("Business Hugs", released 2025-05-08)
 ======================================================================

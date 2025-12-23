@@ -17,6 +17,10 @@ import hy.importer  # NOQA
 hy.importer._inject_builtins()
 # we import for side-effects.
 
+import hy.hy_inspect
+# monkey-patch inspect module for Hy compatibility
+hy.hy_inspect._patch_inspect()
+
 
 class I:
     """``hy.I`` is an object that provides syntactic sugar for imports. It allows syntax like ``(hy.I.math.sqrt 2)``  to mean ``(import math) (math.sqrt 2)``, except without bringing ``math`` or ``math.sqrt`` into scope. (See :ref:`hy.R <hy.R>` for a version that requires a macro instead of importing a Python object.) This is useful in macros to avoid namespace pollution. To refer to a module with dots in its name, use slashes instead: ``hy.I.os/path.basename`` gets the function ``basename`` from the module ``os.path``.
