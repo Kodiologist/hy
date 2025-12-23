@@ -34,17 +34,6 @@
 (setv git (fodder-1.StupidGit))
 
 
-;; --- Hy-specific object tests ---
-
-#_(defn test-is-type []
-    (assert (is (isExpression 1) False))
-    (assert (is (isLazy 1) False))
-    (assert (is (isExpression (hy.read "(+ 1 2)") True)))
-    (assert (is (isExpression (hy.read-many "(+ 1 2)") False)))
-    (assert (is (isLazy (hy.read "(+ 1 2)") False)))
-    (assert (is (isLazy (hy.read-many "(+ 1 2)") True))))
-
-
 ;; --- Hy-specific reader macro tests ---
 
 (defn test-reader []
@@ -76,8 +65,8 @@
 
 (defn test_getdoc_inherited []
   (assert (= (inspect.getdoc fodder-1.FesteringGob) "A longer,\nindented\n\n   docstring."))
-  (assert (= (inspect.getdoc (. fodder-1.FesteringGob abuse)) "Another\n\n    docstring\n\n containing\n        \n\ntabs\n\n "))
-  (assert (= (inspect.getdoc (. (fodder-1.FesteringGob) abuse)) "Another\n\n    docstring\n\n containing\n        \n\ntabs\n\n ")))
+  (assert (= (inspect.getdoc fodder-1.FesteringGob.abuse) "Another\n\n    docstring\n\n containing\n        \n\ntabs\n\n "))
+  (assert (= (inspect.getdoc fodder-1.FesteringGob.abuse) "Another\n\n    docstring\n\n containing\n        \n\ntabs\n\n ")))
 
 
 (defn test_getdoc_inherited_class_doc []
@@ -95,7 +84,7 @@
     
 
 (defn test_getdoc_nodoc_inherited []
-  (assert (is (inspect.getdoc (. fodder-3.ChildNoDoc foo)) None)))
+  (assert (is (inspect.getdoc fodder-3.ChildNoDoc.foo) None)))
 
 
 (defn [(pytest.mark.skipif (not PY3_13)
@@ -108,22 +97,19 @@
 
 (defn test_getsource []
 
-  (defn sourcerange [fodderModule top bottom]
-    (setv source (source-setup fodderModule)
-          lines (source.split "\n"))
-    (return (+ (.join "\n" (cut lines (- top 1) bottom)) 
-               (if bottom "\n" ""))))
+  (setv source (with [fp (open (inspect.getsourcefile fodder-1) "rt")]
+    (.split (.read fp) "\n")))
+  (defn sourcerange [top bottom]
+    (return (+
+      (.join "\n" (cut source (- top 1) bottom))
+      (if bottom "\n" ""))))
 
-  (defn source-setup [fodderModule]
-    (with [fp (open (inspect.getsourcefile fodderModule) :encoding "utf-8")]
-      (.read fp)))
-
-  (assert (= (inspect.getsource git.abuse) (sourcerange fodder-1 28 39)))
-  (assert (= (inspect.getsource fodder-1.lobbest) (sourcerange fodder-1 71 71)))
-  (assert (= (inspect.getsource fodder-1.after_closing) (sourcerange fodder-1 120 120)))
+  (assert (= (inspect.getsource git.abuse) (sourcerange 28 39)))
+  (assert (= (inspect.getsource fodder-1.lobbest) (sourcerange 71 71)))
+  (assert (= (inspect.getsource fodder-1.after_closing) (sourcerange 120 120)))
   (when PY3_13
-    (assert (= (inspect.getsource fodder-1.StupidGit) (sourcerange fodder-1 21 50))))
-  (assert (= (inspect.getsource fodder-1.eggs.__code__) (sourcerange fodder-1 12 18))))
+    (assert (= (inspect.getsource fodder-1.StupidGit) (sourcerange 21 50))))
+  (assert (= (inspect.getsource fodder-1.eggs.__code__) (sourcerange 12 18))))
 
 
 (defn test_getsourcefile []
@@ -143,13 +129,8 @@
   (monkeypatch.syspath_prepend (str tmp_path))
   (import empty_file)
   ;; behaviour changed in 3.13
-  (if PY3_13
-    (do
-      (assert (= (inspect.getsource empty_file) "\n"))
-      (assert (= (inspect.getsourcelines empty_file) #(["\n"] 0))))
-    (do
-      (assert (= (inspect.getsource empty_file) ""))
-      (assert (= (inspect.getsourcelines empty_file) #([] 0))))))
+  (assert (= (inspect.getsource empty_file) (if PY3_13 "\n" "")))
+  (assert (= (inspect.getsourcelines empty_file) #((if PY3_13 ["\n"] []) 0))))
 
 
 (defn test_getfile []

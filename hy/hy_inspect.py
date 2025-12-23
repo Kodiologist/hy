@@ -81,12 +81,9 @@ def findsource(object):
     if isExpression(object) or isLazy(object):
         if getattr(object, "start_line", None) is None:
             raise OSError("source code not available")
-        lnum = object.start_line
-        lines = linecache.getlines(fname)
-        return (lines, lnum)
-
-    # Identify other Hy objects from file extension
+        return (object.start_line, linecache.getlines(fname))
     elif getfile(object).endswith(".hy") and not inspect.isframe(object):
+        # We identify other Hy objects from the file extension.
         module = inspect.getmodule(object, fname)
         # List of source code lines.
         lines = (
@@ -99,11 +96,9 @@ def findsource(object):
         # Some objects already have the information we need.
         elif hasattr(object, "__code__") and hasattr(object.__code__, "co_firstlineno"):
             # This indexing offset is actually correct.
-            lnum = object.__code__.co_firstlineno - 1
-            return (lines, lnum)
+            return (lines, object.__code__.co_firstlineno - 1)
         elif inspect.iscode(object):
-            lnum = object.co_firstlineno - 1
-            return (lines, lnum)
+            return (lines, object.co_firstlineno - 1)
         elif inspect.isclass(object):
             # _ClassFinder exists and can be used prior to python 3.13,
             # but would require compiling the ast which may be unsafe,
@@ -141,7 +136,7 @@ def getcomments(object):
             # Remove shebang.
             start = 1 if lines and lines[0][:2] == "#!" else 0
             # Remove preceding empty lines and textless comments.
-            while start < len(lines) and set(lines[start].strip()) == (";",):
+            while start < len(lines) and set(lines[start].strip()) == {";"}:
                 start += 1
             if start < len(lines) and lines[start].lstrip().startswith(";"):
                 end = start
@@ -162,6 +157,7 @@ def getcomments(object):
             return "".join(comments) if comments else None
         else:
             return None
+
     else:
         # Non-Hy object
         return py_getcomments(object)
@@ -173,16 +169,14 @@ def getsource(object):
     The argument may be a module, class, method, function, traceback, frame,
     or code object.  The source code is returned as a single string.  An
     OSError is raised if the source code cannot be retrieved."""
-    lines, lnum = getsourcelines(object)
-    return "".join(lines)
+    return "".join(getsourcelines(object)[0])
 
 
 def hy_getblock(lines):
     """Extract the lines of code corresponding to the first Hy form from the given list of lines.
 
     Built-in Hy reader macros are allowed as safe, since they do not execute code.
-    User-defined reader macros could theoretically execute code, but they run during
-    parse time, so setting `use_current_readers=False` prevents them entirely.
+    User-defined reader macros could execute code, so we use `HySafeReader`.
     """
     # Read the first form and use its attributes
     try:

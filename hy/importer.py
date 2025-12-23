@@ -14,7 +14,6 @@ from hy.compiler import hy_compile
 from hy.reader import read_many, HyReader
 
 
-
 @contextmanager
 def loader_module_obj(loader):
     """Use the module object associated with a loader.
