@@ -12,14 +12,10 @@ def _initialize_env_var(env_var, default_val):
     return bool(os.environ.get(env_var, default_val))
 
 
-import hy.importer  # NOQA
-
+# Import for side-effects.
+import hy.importer, hy.hy_inspect
 hy.importer._inject_builtins()
-# we import for side-effects.
 
-import hy.hy_inspect
-# monkey-patch inspect module for Hy compatibility
-hy.hy_inspect._patch_inspect()
 
 
 class I:

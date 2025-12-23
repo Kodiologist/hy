@@ -13,35 +13,12 @@ import inspect
 import linecache
 import sys
 from contextlib import suppress
-from inspect import (
-    # keep untouched originals to defer to for python code
-    findsource as py_findsource,
-    getcomments as py_getcomments,
-    getfile as py_getfile,
-    getsource as py_getsource,
-    getsourcelines as py_getsourcelines,
-)
 
 from hy.compat import PY3_13
 from hy.errors import HySyntaxError
 from hy.models import as_model, Expression, Lazy, Object
 from hy.reader import HyReader, read
 from hy.reader.exceptions import LexException, PrematureEndOfInput
-
-
-def _patch_inspect():
-    """Monkey-patch python's inspect with the Hy-compatible functions."""
-    if hasattr(inspect, "__is_hy_patched__"):
-        return
-
-    inspect.getfile = getfile
-    inspect.findsource = findsource
-    inspect.getcomments = getcomments
-    inspect.getsource = getsource
-    inspect.getsourcelines = getsourcelines
-
-    # Set the marker so we don't patch twice
-    inspect.__is_hy_patched__ = True
 
 
 class HySafeReader(HyReader):
@@ -247,3 +224,15 @@ def getsourcelines(object):
     else:
         # Non-Hy object
         return py_getsourcelines(object)
+
+
+if hasattr(inspect, "_hy_originals"):
+    # Retrieve saved versions of `inspect`'s original functions.
+    py_findsource, py_getcomments, py_getfile, py_getsource, py_getsourcelines = inspect._hy_originals
+else:
+    # Save the originals and then monkey-patch.
+    inspect._hy_originals = \
+        py_findsource,       py_getcomments,      py_getfile,      py_getsource,      py_getsourcelines = \
+        inspect.findsource,  inspect.getcomments, inspect.getfile, inspect.getsource, inspect.getsourcelines
+    inspect.findsource, inspect.getcomments, inspect.getfile, inspect.getsource, inspect.getsourcelines = \
+            findsource,         getcomments,         getfile,         getsource,         getsourcelines
