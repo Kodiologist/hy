@@ -23,21 +23,21 @@
     indented
 
        docstring."
-  
+
 ; line 27
   (defn abuse [self a b c]
     "Another
-    
+
         docstring
 
      containing
-\t    
-    
+\t
+
     tabs
 
      "
     (self.argue a b c))
-  
+
 ; line 40
   (defn argue [self a b c]
     (try
@@ -79,10 +79,10 @@
 
 
 (defclass Callable []
-  
+
   (defn __call__ [self #* args]
     (return args))
-  
+
   (defn as_method_of [self obj]
     (import types [MethodType])
     (return (MethodType self obj))))
@@ -104,7 +104,7 @@
     ; end f
     ; line 105
   ; after f
-  
+
   ; before asyncf - line 108))
   (defn :async asyncf [self]
     ; start asyncf
@@ -115,6 +115,6 @@
 ; after WhichComments - line 115
 
 #()
-  
-  
+
+
 (defn after_closing [] (fn [] 1))

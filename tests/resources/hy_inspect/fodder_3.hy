@@ -27,4 +27,3 @@
 (defclass ChildDefineDoc [ParentNoDoc]
   (defn [cached_property] foo [self]
     "docstring for foo defined in child"))
-

@@ -1,5 +1,5 @@
 (defreader m 'x)
-  
+
 (defreader do-twice
   (setv x (.parse-one-form &reader))
   `(do ~x ~x))
@@ -13,7 +13,7 @@
   out)
 
 (defn multiform-reader-macro [#* xs] (hy.repr #< #* xs >))
- 
+
 (defn f-with-reader [] (setv #m "x was assigned") x)
 
 #do-twice (setv x "x is assigned twice")

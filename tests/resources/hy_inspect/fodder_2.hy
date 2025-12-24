@@ -63,7 +63,7 @@
                      (fn [x
                           y]
                        (+ x y)) None])
-                     
+
 
 ; line 68
 (defn func69 []
@@ -133,7 +133,7 @@
 
 ; line 134
 (defclass cls135 []
-  
+
   (defn func136 []
     (defn func137 []
       never_reached1
@@ -181,7 +181,7 @@ class cls160:
 
 ; line 182
 (defclass cls183 []
-  
+
   (defclass cls185 []
     (defn func186 [self])))
 
@@ -193,15 +193,15 @@ class cls160:
 ; line 193
 (defclass [class_decorator class_decorator]
   cls196 []
-  
+
   (defclass [class_decorator class_decorator]
     cls200 []))
 
 (defclass cls203 []
-  
+
   (defclass cls204 []
     (defclass cls205 []))
-  
+
   (defclass cls207 []
     (defclass cls205 [])))
 
@@ -216,7 +216,7 @@ class cls160:
 
 ; line 217
 (defclass cls213 []
-  
+
   (defn func219 [self]
     (defclass cls220 [])
     (return cls220)))
@@ -229,7 +229,7 @@ class cls160:
 
 ; line 230
 (defclass cls226 []
-  
+
   (defn :async func232
     [self]
     (defclass cls233 [])
@@ -262,7 +262,7 @@ class cls160:
 
 ; line 263
 (defn deco_factory [#** kwargs]
-  
+
   (defn deco [f]
     (defn [(wraps f)] wrapper [#* a #** kwd]
       (kwd.update kwargs)
@@ -352,7 +352,7 @@ class cls160:
 
 ; line 353
 (defclass td354 [typing.TypedDict]
-  #^ int x 
+  #^ int x
   #^ int y)
 
 ; line 258
@@ -362,7 +362,7 @@ class cls160:
 
 ; line 363
 (defclass [dataclasses.dataclass] dc364 []
-  #^ int x 
+  #^ int x
   #^ int y)
 
 
@@ -399,6 +399,5 @@ class cls160:
   [decorator]
   func400 []
   (return 401
-          
-          )) ; end of file
 
+          )) ; end of file

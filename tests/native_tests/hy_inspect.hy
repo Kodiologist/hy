@@ -58,15 +58,15 @@
   ;; The results below seem to be consistent with PEP 257 though.
   (assert (= (inspect.getdoc fodder-1) "A module docstring."))
   (assert (= (inspect.getdoc fodder-1.StupidGit) "A longer,\nindented\n\n   docstring."))
-  (assert (= (inspect.getdoc git.abuse) "Another\n\n    docstring\n\n containing\n        \n\ntabs\n\n "))
+  (assert (= (inspect.getdoc git.abuse) "Another\n\n    docstring\n\n containing\n    \n\ntabs\n\n "))
   (assert (= (inspect.getdoc SlotUser.power) "measured in kilowatts"))
   (assert (= (inspect.getdoc SlotUser.distance) "measured in kilometers")))
 
 
 (defn test_getdoc_inherited []
   (assert (= (inspect.getdoc fodder-1.FesteringGob) "A longer,\nindented\n\n   docstring."))
-  (assert (= (inspect.getdoc fodder-1.FesteringGob.abuse) "Another\n\n    docstring\n\n containing\n        \n\ntabs\n\n "))
-  (assert (= (inspect.getdoc fodder-1.FesteringGob.abuse) "Another\n\n    docstring\n\n containing\n        \n\ntabs\n\n ")))
+  (assert (= (inspect.getdoc fodder-1.FesteringGob.abuse) "Another\n\n    docstring\n\n containing\n    \n\ntabs\n\n "))
+  (assert (= (inspect.getdoc fodder-1.FesteringGob.abuse) "Another\n\n    docstring\n\n containing\n    \n\ntabs\n\n ")))
 
 
 (defn test_getdoc_inherited_class_doc []
@@ -81,7 +81,7 @@
   (assert (is (inspect.getdoc b) None))
   (setv b.__doc__ "Instance")
   (assert (= (inspect.getdoc b) "Instance")))
-    
+
 
 (defn test_getdoc_nodoc_inherited []
   (assert (is (inspect.getdoc fodder-3.ChildNoDoc.foo) None)))
@@ -93,7 +93,7 @@
   (assert (= (inspect.getcomments fodder-1) "; line 1\n"))
   (assert (= (inspect.getcomments fodder-1.StupidGit) "; line 20\n"))
   (assert (= (inspect.getcomments fodder-2.cls160) "; line 159\n")))
-    
+
 
 (defn test_getsource []
 
@@ -135,21 +135,21 @@
 
 (defn test_getfile []
   (assert (= (inspect.getfile fodder-1.StupidGit) fodder-1.__file__)))
-    
+
 
 (defn test_getfile_class_without_module []
-      
+
   (defclass CM [type]
     (defn [property] __module__ [cls] (raise AttributeError)))
 
   (defclass C [])
   (with [(pytest.raises TypeError)]
     (inspect.getfile C
-    
+
       (defn test_getfile_broken_repr []
-      
+
         (defclass ErrorRepr []
-        
+
           (defn __repr__ []
             (raise (Exception "xyz"))))
 
