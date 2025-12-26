@@ -14,6 +14,9 @@ New Features
   monkey-patched to work better with Hy code: `findsource`,
   `getcomments`, `getfile`, `getsource`, `getsourcelines`.
 
+  * As a result, the `ll` command in `pdb` should now show a more
+    useful result in more cases.
+
 1.1.0 ("Business Hugs", released 2025-05-08)
 ======================================================================
 
