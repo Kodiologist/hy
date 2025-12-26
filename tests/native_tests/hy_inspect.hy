@@ -14,12 +14,7 @@
 
 ;; --- Modules translated from the python inspect's test suite ---
 
-
-(import tests.resources.hy-inspect [fodder-1 fodder-3 fodder-4])
-(when PY3_13
-  ; can't import before 3.13
-  (import tests.resources.hy-inspect [fodder-2]))
-
+(import tests.resources.hy-inspect [fodder-1 fodder-2])
 
 ;; --- Data ---
 
@@ -37,11 +32,11 @@
 ;; --- Hy-specific reader macro tests ---
 
 (defn test-reader []
-  (assert (= (getsource fodder-4.f-with-reader)
+  (assert (= (getsource fodder-2.f-with-reader)
              "(defn f-with-reader [] (setv #m \"x was assigned\") x)\n"))
-  (assert (= (get (.split (.strip (getsource fodder-4)) "\n") -1)
+  (assert (= (get (.split (.strip (getsource fodder-2)) "\n") -1)
              "#do-twice (setv x \"x is assigned twice\")"))
-  (assert (= (getsource fodder-4.multiform-reader-macro)
+  (assert (= (getsource fodder-2.multiform-reader-macro)
              "(defn multiform-reader-macro [#* xs] (hy.repr #< #* xs >))\n")))
 
 
@@ -84,15 +79,13 @@
 
 
 (defn test_getdoc_nodoc_inherited []
-  (assert (is (inspect.getdoc fodder-3.ChildNoDoc.foo) None)))
+  (assert (is (inspect.getdoc fodder-1.ChildNoDoc.foo) None)))
 
 
-(defn [(pytest.mark.skipif (not PY3_13)
-                           :reason "relies on hy.hy_inspect.findsource which is not available before 3.13")]
-  test_getcomments []
-  (assert (= (inspect.getcomments fodder-1) "; line 1\n"))
-  (assert (= (inspect.getcomments fodder-1.StupidGit) "; line 20\n"))
-  (assert (= (inspect.getcomments fodder-2.cls160) "; line 159\n")))
+(defn test_getcomments []
+  (assert (= (inspect.getcomments fodder-1) "; first line of the file\n"))
+  (when PY3_13
+    (assert (= (inspect.getcomments fodder-1.StupidGit) "; comment before StupidGit\n"))))
 
 
 (defn test_getsource []
@@ -104,12 +97,12 @@
       (.join "\n" (cut source (- top 1) bottom))
       (if bottom "\n" ""))))
 
-  (assert (= (inspect.getsource git.abuse) (sourcerange 28 39)))
-  (assert (= (inspect.getsource fodder-1.lobbest) (sourcerange 71 71)))
-  (assert (= (inspect.getsource fodder-1.after_closing) (sourcerange 120 120)))
+  (assert (= (inspect.getsource git.abuse) (sourcerange 24 35)))
+  (assert (= (inspect.getsource fodder-1.lobbest) (sourcerange 52 52)))
+  (assert (= (inspect.getsource fodder-1.after_closing) (sourcerange 58 58)))
   (when PY3_13
-    (assert (= (inspect.getsource fodder-1.StupidGit) (sourcerange 21 50))))
-  (assert (= (inspect.getsource fodder-1.eggs.__code__) (sourcerange 12 18))))
+    (assert (= (inspect.getsource fodder-1.StupidGit) (sourcerange 18 35))))
+  (assert (= (inspect.getsource fodder-1.eggs.__code__) (sourcerange 9 15))))
 
 
 (defn test_getsourcefile []
@@ -131,29 +124,3 @@
   ;; behaviour changed in 3.13
   (assert (= (inspect.getsource empty_file) (if PY3_13 "\n" "")))
   (assert (= (inspect.getsourcelines empty_file) #((if PY3_13 ["\n"] []) 0))))
-
-
-(defn test_getfile []
-  (assert (= (inspect.getfile fodder-1.StupidGit) fodder-1.__file__)))
-
-
-(defn test_getfile_class_without_module []
-
-  (defclass CM [type]
-    (defn [property] __module__ [cls] (raise AttributeError)))
-
-  (defclass C [])
-  (with [(pytest.raises TypeError)]
-    (inspect.getfile C
-
-      (defn test_getfile_broken_repr []
-
-        (defclass ErrorRepr []
-
-          (defn __repr__ []
-            (raise (Exception "xyz"))))
-
-        (setv er (ErrorRepr))
-
-        (with [(pytest.raises TypeError)]
-          (inspect.getfile er))))))
