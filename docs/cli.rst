@@ -64,3 +64,5 @@ hyc
 
     .. warning::
        ``hyc`` can execute arbitrary code (via macros, :hy:func:`eval-when-compile`, etc.). Don't give it untrusted input.
+
+In practice, ``hyc`` is rarely useful, because Hy produces bytecode automatically. It exists mostly for historical reasons, and may be removed in a future major release of Hy.
