@@ -22,6 +22,8 @@ Bug Fixes
   use it, like `brackets`) in which tuples were not always produced.
 * Added pattern matching support to String, Bytes, Symbol, Integer, Float,
   and Complex models.
+* Fixed an importlib exception when using `hy.eval` on code that
+  required other modules.
 
 1.2.0 ("Crackers and Snacks", released 2026-01-14)
 ======================================================================

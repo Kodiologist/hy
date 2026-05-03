@@ -288,3 +288,8 @@ def test_zipimport(tmp_path):
         sys.path = [p for p in sys.path if p != str(zpath)]
     assert example.x == "Hy from ZIP"
     assert example.__file__ == str(zpath / "example.hy")
+
+
+def test_eval_requiring_macro():
+    # https://github.com/hylang/hy/issues/2695
+    hy.eval(hy.read("(require tests.resources.macros)"), globals={})
