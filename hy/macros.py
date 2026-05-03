@@ -118,7 +118,9 @@ def _same_modules(source_module, target_module):
 def derive_target_module(target_module, parent_frame):
     if target_module is None:
         target_namespace = parent_frame.f_globals
-        target_module = target_namespace.get("__name__", None)
+        target_module = target_namespace.get("__name__", "builtins")
+          # Why "builtins"? Because that's what Python produces with
+          # `exec("print(__name__)", globals = {})`.
     elif isinstance(target_module, str):
         target_module = importlib.import_module(target_module)
         target_namespace = target_module.__dict__
