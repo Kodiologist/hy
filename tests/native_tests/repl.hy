@@ -121,7 +121,9 @@
   ; https://github.com/hylang/hy/issues/2004
   (assert (has
     (rt "(defn foo [/])\n(defn bar [a a])" 'err)
-    "SyntaxError: duplicate argument"))
+    "SyntaxError: duplicate "))
+      ; It may say "duplicate argument" or "duplicate parameter",
+      ; depending on the Python version.
   ; https://github.com/hylang/hy/issues/2014
   (setv err (rt "(defn foo []\n(import re *))" 'err))
   (assert (has err "SyntaxError: import * only allowed"))
