@@ -86,8 +86,7 @@
   (for [[expr answer] cases]
     ; Mutate the case as appropriate for the operator before
     ; evaluating it.
-    (setv expr (+ (hy.models.Expression
-                    [(hy.models.Symbol specialop)]) (cut expr 1 None)))
+    (setv expr `(~(hy.models.Symbol specialop) ~@(cut expr 1 None)))
     (when (= specialop "dfor")
       (+= expr `(1)))
     (when (= specialop "for")
