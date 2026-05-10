@@ -13,10 +13,10 @@
           (list o))
         :setv x (.rstrip x)
         :if (and x (not (.startswith x ";")))
-        x (if (in (get x 0) "':")
+        :if (or hy.compat.PY3_15 (not (.startswith x "(frozendict")))
+        #* (if (in (get x 0) "':")
           [x]
-          [x (+ "'" x)])
-        x)]
+          [x (+ "'" x)]))]
 
     (setv rep (hy.repr (hy.eval (hy.read original-str))))
     (assert (= rep original-str))))

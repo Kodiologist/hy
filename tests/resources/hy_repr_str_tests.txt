@@ -76,6 +76,7 @@ b"\"double \" quotes\""
 #{}
 (frozenset #{})
 {}
+(frozendict {})
 
 ['[]]
 [1 2 3]
@@ -85,6 +86,8 @@ b"\"double \" quotes\""
 (frozenset #{1 2 3})
 {"a" 1  "b" 2}
 {"b" 2  "a" 1}
+(frozendict {"a" 1  "b" 2})
+(frozendict {"b" 2  "a" 1})
 
 '[1 a 3]
 [1 'a 3]
