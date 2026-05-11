@@ -347,7 +347,7 @@ The result is the model type :class:`String <hy.models.String>`.
 You may prefix a string literal with ``b`` to treat it as a sequence of bytes,
 producing :class:`Bytes <hy.models.Bytes>` instead.
 
-Unlike Python, Hy only recognizes string prefixes (``r``, ``b``, and ``f``) in
+Unlike Python, Hy only recognizes string prefixes (``r``, ``b``, ``f``, ``t``) in
 lowercase, and doesn't allow the no-op prefix ``u``.
 
 :ref:`F-strings <syntax-fstrings>` are a string-like compound construct
@@ -503,6 +503,28 @@ language. Thus e.g. ``f"{"a"}"`` is legal, and equivalent to ``"a"``.
 
 .. autoclass:: hy.models.FString
 .. autoclass:: hy.models.FComponent
+
+.. _syntax-tstrings:
+
+Template strings
+~~~~~~~~~~~~~~~~
+
+:py:mod:`Template strings <string.templatelib>` (aka "t-strings" or "template
+string literals") are similar to format strings, and parse to :class:`FString <hy.models.FString>`
+with the parameter ``:is_tstring`` set to ``True``.
+Template strings at runtime evaluate to instances of :py:class:`Template
+<string.templatelib.Template>` containing the sequence of string and
+expression components, without any interpolation.
+Template strings use the prefix "t" in front of a string. Otherwise, the syntax
+of t-strings are exactly the same as f-strings. ::
+
+    (setv tstr t"The sum is {(+ 1 1)}.")
+    tstr.strings      ; => #("The sum is " ".")
+    tstr.values       ; => #(2)
+
+If the :ref:`bracketed-templates <bracketed-templates>` pragma is set, then
+:ref:`bracket strings <bracket-strings>` using the delimiter "t" or any
+delimiter starting with "t-" are also parsed as template strings.
 
 .. _more-sugar:
 

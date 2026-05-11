@@ -187,6 +187,12 @@ Fundamentals
     dangerous, because other macros may call your new macro when they meant to
     refer to the core macro.
 
+    .. _bracketed-templates:
+
+  - ``:bracketed-templates``: If set, then :ref:`bracket strings
+    <bracket-strings>` using the delimiter "t" or any delimiter starting with
+    "t-" are parsed as :ref:`template strings <syntax-tstrings>`.
+
 Quoting
 ~~~~~~~~~~~~
 
