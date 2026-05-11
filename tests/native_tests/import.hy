@@ -1,22 +1,19 @@
 ;; Tests of `import`, `require`, and `export`
 
 (import
-  importlib
-  os.path
-  os.path [exists isdir isfile]
-  sys :as systest
-  sys
   pytest)
 
 
 (defn test-imported-bits []
-  (assert (is (exists ".") True))
-  (assert (is (isdir ".") True))
-  (assert (is (isfile ".") False)))
+  (import os.path [exists isdir isfile])
+  (assert (exists "."))
+  (assert (isdir "."))
+  (assert (not (isfile "."))))
 
 
 (defn test-importas []
-  (assert (!= (len systest.path) 0)))
+  (import sys :as systest)
+  (assert (len systest.path)))
 
 
 (defn test-import-syntax []
