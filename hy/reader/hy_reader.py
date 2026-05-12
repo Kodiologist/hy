@@ -125,8 +125,10 @@ class HyReader(Reader):
     NON_IDENT = set("()[]{};\"'`~")
     _current_reader = None
 
-    def __init__(self, *, use_current_readers=False):
+    def __init__(self, *, use_current_readers=False, bracketed_templates=False):
         super().__init__()
+
+        self.bracketed_templates = bracketed_templates
 
         # move any reader macros declared using
         # `reader_for("#...")` to the macro table
@@ -426,7 +428,7 @@ class HyReader(Reader):
         delim = "".join(delim)
         fstring_mode = (
             "f" if delim == "f" or delim.startswith("f-")
-            else "t" if PY3_14 and (delim == "t" or delim.startswith("t-"))
+            else "t" if self.bracketed_templates and (delim == "t" or delim.startswith("t-"))
             else ""
         )
 
