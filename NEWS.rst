@@ -10,6 +10,8 @@ Supports Python 3.x – Python 3.y
 New Features
 ------------------------------
 * ``hyc`` now supports ``-q``/``--quiet`` to suppress progress messages.
+* Added support for t-strings from Python 3.14.
+* Added new pragma `bracketed-templates` to allow parsing `#[t[...]t]` and `#[t-<ident>[...]t-<ident>]` as template strings (analogous to bracketed f-strings).
 
 Bug Fixes
 ------------------------------
@@ -24,6 +26,7 @@ Bug Fixes
   and Complex models.
 * Fixed an importlib exception when using `hy.eval` on code that
   required other modules.
+* Invalid conversion chars in f-strings now properly raise a syntax error.
 
 1.2.0 ("Crackers and Snacks", released 2026-01-14)
 ======================================================================
