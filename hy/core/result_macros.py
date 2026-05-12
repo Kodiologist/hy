@@ -2031,8 +2031,13 @@ def compile_require(compiler, expr, root, entries):
     return ret
 
 
-@pattern_macro("import", [many(module_name_pattern + maybe(importlike))])
-def compile_import(compiler, expr, root, entries):
+@pattern_macro("import", [maybe(keepsym(":lazy")), many(module_name_pattern + maybe(importlike))])
+def compile_import(compiler, expr, root, is_lazy, entries):
+
+    if not PY3_15 and is_lazy:
+        hy_compiler._syntax_error(is_lazy, "Lazy imports require Python 3.15 or later")
+    is_lazy = dict(is_lazy = True) if is_lazy else {}
+
     ret = Result()
 
     for entry in entries:
@@ -2061,6 +2066,7 @@ def compile_import(compiler, expr, root, entries):
         ret += node(
             expr,
             names = names,
+            **is_lazy,
             **({} if node is asty.Import else dict(
                 module = module_name
                     if module_name and module_name.strip(".")

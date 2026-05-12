@@ -50,6 +50,30 @@
   (assert (= resources.in-init "chippy")))
 
 
+(defn [(pytest.mark.skipif (not hy.compat.PY3_15) :reason "Lazy imports require Python 3.15")]
+test-lazy []
+
+  ; The code is wrapped in `hy.eval` because otherwise, pytest may
+  ; resolve lazy imports too early.
+
+  (hy.eval :globals {} '(do
+
+    (import :lazy
+      ; `:lazy` applies to all modules in the form.
+      stringprep
+      statistics [mode])
+
+    (import types [LazyImportType ModuleType FunctionType])
+
+    (assert (isinstance (:stringprep (globals)) LazyImportType))
+    stringprep
+    (assert (isinstance (:stringprep (globals)) ModuleType))
+
+    (assert (isinstance (:mode (globals)) LazyImportType))
+    (assert (= (mode [1 1 2]) 1))
+    (assert (isinstance (:mode (globals)) FunctionType)))))
+
+
 (defn test-import-init-hy []
   (import tests.resources.bin)
   (assert (in "_null_fn_for_import_test" (dir tests.resources.bin))))

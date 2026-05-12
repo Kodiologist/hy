@@ -11,6 +11,7 @@ New Features
 ------------------------------
 * Unpacking is now supported in comprehensions (PEP 798), even on
   Pythons < 3.15.
+* ``(import :lazy …)`` is allowed on Pythons ≥ 3.15 (PEP 810).
 * ``hyc`` now supports ``-q``/``--quiet`` to suppress progress messages.
 * Added support for t-strings from Python 3.14.
 * Added new pragma `bracketed-templates` to allow parsing `#[t[...]t]` and `#[t-<ident>[...]t-<ident>]` as template strings (analogous to bracketed f-strings).

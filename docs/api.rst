@@ -1183,6 +1183,17 @@ Modules
                sys :as systest
                math *)
 
+       ;; On Python 3.15 or later, the keyword `:lazy` may be used as
+       ;; the first argument to enable lazy importing (PEP 810), which
+       ;; applies to all modules in the form.
+       ;; Python:
+       ;;     lazy import os, math
+       ;;     lazy from cmath import sqrt
+       (import :lazy
+               os
+               math
+               cmath [sqrt])
+
    ``__all__`` can be set to control what's imported by ``(import module-name
    *)``, as in Python, but beware that all names in ``__all__`` must be
    :ref:`mangled <mangling>`. The macro :hy:func:`export
