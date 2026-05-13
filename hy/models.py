@@ -546,12 +546,8 @@ class FString(Sequence):
             args.append(f"brackets={self.brackets!r}")
         if self.is_tstring:
             args.append(f"is_tstring={self.is_tstring!r}")
-        s = x[:-1]  # Clip off the final close paren
-        if s[-1] != "(":
-            s += ", "
-        s += ", ".join(args)
-        s += ")"
-        return s
+        x = x[:-1]  # Clip off the final close paren
+        return x + ("" if x[-1] == "(" else ", ") + ", ".join(args) + ")"
 
 
 class List(Sequence):
