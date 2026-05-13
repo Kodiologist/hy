@@ -544,7 +544,7 @@ class FString(Sequence):
         args = []
         if self.brackets is not None:
             args.append(f"brackets={self.brackets!r}")
-        if PY3_14 and self.is_tstring:
+        if self.is_tstring:
             args.append(f"is_tstring={self.is_tstring!r}")
         s = x[:-1]  # Clip off the final close paren
         if s[-1] != "(":
