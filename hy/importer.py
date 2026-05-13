@@ -77,12 +77,19 @@ def _hy_code_from_file(filename, loader_type=None):
     return code
 
 
-def _get_code_from_file(run_name, fname=None, hy_src_check=lambda x: x.endswith(".hy")):
+def _get_code_from_file(*args, hy_src_check=lambda x: x.endswith(".hy")):
     """A patch of `runpy._get_code_from_file` that will also run and cache Hy
     code.
     """
-    if fname is None and run_name is not None:
-        fname = run_name
+
+    if hy.compat.PY3_15:
+        fname, module = args
+    elif hy.compat.PY3_12:
+        fname, = args
+    else:
+        run_name, fname = args
+        if fname is None and run_name is not None:
+            fname = run_name
 
     # Check for bytecode first.  (This is what the `runpy` version does!)
     with open(fname, "rb") as f:
@@ -97,7 +104,9 @@ def _get_code_from_file(run_name, fname=None, hy_src_check=lambda x: x.endswith(
                 # This code differs from `runpy`'s only in that we
                 # force decoding into UTF-8.
                 source = f.read().decode("utf-8")
-            code = compile(source, fname, "exec")
+            code = compile(
+                source, fname, "exec",
+                **(dict(module=module) if hy.compat.PY3_15 else {}))
 
     return code if hy.compat.PY3_12_6 else (code, fname)
 
@@ -113,7 +122,7 @@ def _could_be_hy_src(filename):
     )
 
 
-def _hy_source_to_code(self, data, path, _optimize=-1):
+def _hy_source_to_code(self, data, path, fullname=None, _optimize=-1):
     if _could_be_hy_src(path):
         if os.environ.get("HY_MESSAGE_WHEN_COMPILING"):
             print("Compiling", path, file=sys.stderr)
@@ -122,7 +131,10 @@ def _hy_source_to_code(self, data, path, _optimize=-1):
         with loader_module_obj(self) as module:
             data = hy_compile(hy_tree, module)
 
-    return _py_source_to_code(self, data, path, _optimize=_optimize)
+    return _py_source_to_code(
+        self, data, path,
+        _optimize=_optimize,
+        **(dict(fullname=fullname) if hy.compat.PY3_15 else {}))
 
 
 importlib.machinery.SourceFileLoader.source_to_code = _hy_source_to_code
@@ -132,9 +144,9 @@ if (".hy", False, False) not in zipimport._zip_searchorder:
     zipimport._zip_searchorder += ((".hy", False, False),)
     _py_compile_source = zipimport._compile_source
 
-    def _hy_compile_source(pathname, source):
+    def _hy_compile_source(pathname, source, module=None):
         if not pathname.endswith(".hy"):
-            return _py_compile_source(pathname, source)
+            return _py_compile_source(pathname, source, module)
         mname = f"<zip:{pathname}>"
         sys.modules[mname] = types.ModuleType(mname)
         return compile(
