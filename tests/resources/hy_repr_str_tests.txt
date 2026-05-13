@@ -138,6 +138,16 @@ b"\"double \" quotes\""
 
 '#[f-delim[the answer is {(+ 2 2) :{(+ 2 3)}}]f-delim]
 
+;; * T-strings
+
+'t"hello world"
+'t"hello{3}world"
+'t"hello{(+ 2 1)}world"
+'t"hello{3 !r}world"
+'t"hello{3 :#x}world"
+'#[t[this is {1} template]t]
+'#[t-algo[so {(+ 1 1)} is this {(- 5 4)}]t-algo]
+
 ;; * Ranges and slices
 
 (range 5)

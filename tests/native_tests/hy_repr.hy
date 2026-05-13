@@ -18,7 +18,9 @@
           [x]
           [x (+ "'" x)]))]
 
-    (setv rep (hy.repr (hy.eval (hy.read original-str))))
+    (setv rep (hy.repr (hy.eval (hy.read
+      original-str
+      :reader (hy.HyReader :bracketed-templates True)))))
     (assert (= rep original-str))))
 
 (defn test-hy-repr-roundtrip-from-value []
