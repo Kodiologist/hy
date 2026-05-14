@@ -90,6 +90,9 @@
     [k v] (.items x)
     (+ (hy-repr k) " " (hy-repr v)))))
   (+ "{" text "}")))
+(when hy.compat.PY3_15
+  (hy-repr-register frozendict :placeholder "(frozendict {...})" (fn [x]
+    (.format "(frozendict {})" (hy-repr (dict x))))))
 (hy-repr-register hy.models.Dict :placeholder "{...}" (fn [x]
   (setv text (.join " " (gfor
     [i item] (enumerate x)

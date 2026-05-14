@@ -43,6 +43,9 @@ Call me Ishmael. Some years ago—never mind how long precisely—having little 
 (import itertools [cycle])
 (setv mygenexpr (gfor x (cycle [1 2 3]) :if (!= x 2) x))
 
+(setv unpacking-listcomp (lfor  x [[7 8 9] [] [1 2 3]]  #* x))
+(setv unpacking-dictcomp (dfor  x [{"a" 1} {"b" 2  "c" 3}]  #** x))
+
 (setv [unpacked1 #* repacked unpacked2] "WXYZ")
 (setv :chain [chained1 chained2 chained3] 77)
 

@@ -1,22 +1,19 @@
 ;; Tests of `import`, `require`, and `export`
 
 (import
-  importlib
-  os.path
-  os.path [exists isdir isfile]
-  sys :as systest
-  sys
   pytest)
 
 
 (defn test-imported-bits []
-  (assert (is (exists ".") True))
-  (assert (is (isdir ".") True))
-  (assert (is (isfile ".") False)))
+  (import os.path [exists isdir isfile])
+  (assert (exists "."))
+  (assert (isdir "."))
+  (assert (not (isfile "."))))
 
 
 (defn test-importas []
-  (assert (!= (len systest.path) 0)))
+  (import sys :as systest)
+  (assert (len systest.path)))
 
 
 (defn test-import-syntax []
@@ -51,6 +48,30 @@
   (assert (= in-init "chippy"))
   (import .. [resources])
   (assert (= resources.in-init "chippy")))
+
+
+(defn [(pytest.mark.skipif (not hy.compat.PY3_15) :reason "Lazy imports require Python 3.15")]
+test-lazy []
+
+  ; The code is wrapped in `hy.eval` because otherwise, pytest may
+  ; resolve lazy imports too early.
+
+  (hy.eval :globals {} '(do
+
+    (import :lazy
+      ; `:lazy` applies to all modules in the form.
+      stringprep
+      statistics [mode])
+
+    (import types [LazyImportType ModuleType FunctionType])
+
+    (assert (isinstance (:stringprep (globals)) LazyImportType))
+    stringprep
+    (assert (isinstance (:stringprep (globals)) ModuleType))
+
+    (assert (isinstance (:mode (globals)) LazyImportType))
+    (assert (= (mode [1 1 2]) 1))
+    (assert (isinstance (:mode (globals)) FunctionType)))))
 
 
 (defn test-import-init-hy []

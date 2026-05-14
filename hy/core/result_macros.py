@@ -16,7 +16,7 @@ from itertools import dropwhile, zip_longest
 from funcparserlib.parser import finished, forward_decl, many, maybe, oneplus, some
 
 from hy import last_version
-from hy.compat import PY3_11, PY3_12
+from hy.compat import PY3_11, PY3_12, PY3_15
 from hy.compiler import Result, asty, mkexpr
 from hy.errors import HyEvalError, HyInternalError, HyTypeError
 from hy.macros import pattern_macro, require, require_reader, local_macro_name
@@ -818,7 +818,7 @@ loopers = many(
     brackets(loopers, name = 'square-bracketed loop clauses'),
     many(notpexpr("else")) + maybe(dolike("else"))])
 @pattern_macro(["lfor", "sfor", "gfor"], [loopers, FORM])
-@pattern_macro(["dfor"], [loopers, finished])
+@pattern_macro(["dfor"], [loopers, finished | unpack("mapping")])
 # Here `finished` is a hack replacement for FORM + FORM:
 # https://github.com/vlasovskikh/funcparserlib/issues/75
 def compile_comprehension(compiler, expr, root, parts, final):
@@ -836,15 +836,17 @@ def compile_comprehension(compiler, expr, root, parts, final):
     with mac_con, ctx as scope:
 
         # Compile the parts.
+        dict_unpack = False
         if is_for:
             parts = parts[0]
         if node_class is asty.DictComp:
-            if not (parts and parts[-1].tag == "for"):
+            dict_unpack = bool(final)
+            if not (dict_unpack or (parts and parts[-1].tag == "for")):
                 raise compiler._syntax_error(
                     parts[-1] if parts else parts,
-                    "`dfor` must end with key and value forms",
+                    "`dfor` must end with key and value forms, or `#** FORM`",
                 )
-            final = parts.pop().value
+            final = final or parts.pop().value
         if not parts:
             return Result(
                 expr=asty.parse(
@@ -884,17 +886,23 @@ def compile_comprehension(compiler, expr, root, parts, final):
         else:
             # Get the final value (and for dictionary
             # comprehensions, the final key).
+            key = elt = None
             if node_class is asty.DictComp:
-                key, elt = map(compiler.compile, final)
+                if dict_unpack:
+                    key = compiler.compile(final[1])
+                else:
+                    key, elt = map(compiler.compile, final)
             else:
-                key = None
                 elt = compiler.compile(final)
+
+        ends_with_unpack = not is_for and (dict_unpack or (elt and isinstance(elt.expr, ast.Starred)))
 
         # Produce a result.
         if (
             is_for
-            or elt.stmts
+            or (elt is not None and elt.stmts)
             or (key is not None and key.stmts)
+            or (not PY3_15 and ends_with_unpack)
             or any(
                 p.tag == "do"
                 or (
@@ -911,13 +919,33 @@ def compile_comprehension(compiler, expr, root, parts, final):
             def f(parts):
                 # This function is called recursively to construct
                 # the nested loop.
+                nonlocal elt, ends_with_unpack
                 if not parts:
                     if is_for:
                         if body:
                             bd = compiler._compile_branch(body)
                             return bd + bd.expr_as_stmt()
                         return Result(stmts=[asty.Pass(expr)])
-                    if node_class is asty.DictComp:
+                    if ends_with_unpack:
+                        ends_with_unpack = False
+                        to_loop = Result(expr =
+                            # Call `key.items()` so we yield (key,
+                            # value) pairs instead of just keys.
+                            asty.Call(key,
+                                args = [],
+                                keywords = [],
+                                func = asty.Attribute(key,
+                                    value = key.force_expr,
+                                    attr = 'items',
+                                    ctx = ast.Load()))
+                            if dict_unpack
+                            else elt.expr.value)
+                        temp_var = compiler.get_anon_var()
+                        elt = compiler.compile(Symbol(temp_var).replace(final))
+                        return f([["for", (
+                            asty.Name(final, id=mangle(temp_var), ctx=ast.Store()),
+                            to_loop)]])
+                    if node_class is asty.DictComp and not dict_unpack:
                         ret = key + elt
                         val = asty.Tuple(
                             key, ctx=ast.Load(), elts=[key.force_expr, elt.force_expr]
@@ -1059,7 +1087,7 @@ def compile_comprehension(compiler, expr, root, parts, final):
                 raise ValueError("can't happen")
         if node_class is asty.DictComp:
             return asty.DictComp(
-                expr, key=key.expr, value=elt.expr, generators=generators
+                expr, key=key.expr, value=(elt and elt.expr), generators=generators
             )
         return node_class(expr, elt=elt.expr, generators=generators)
 
@@ -2003,8 +2031,13 @@ def compile_require(compiler, expr, root, entries):
     return ret
 
 
-@pattern_macro("import", [many(module_name_pattern + maybe(importlike))])
-def compile_import(compiler, expr, root, entries):
+@pattern_macro("import", [maybe(keepsym(":lazy")), many(module_name_pattern + maybe(importlike))])
+def compile_import(compiler, expr, root, is_lazy, entries):
+
+    if not PY3_15 and is_lazy:
+        hy_compiler._syntax_error(is_lazy, "Lazy imports require Python 3.15 or later")
+    is_lazy = dict(is_lazy = True) if is_lazy else {}
+
     ret = Result()
 
     for entry in entries:
@@ -2033,6 +2066,7 @@ def compile_import(compiler, expr, root, entries):
         ret += node(
             expr,
             names = names,
+            **is_lazy,
             **({} if node is asty.Import else dict(
                 module = module_name
                     if module_name and module_name.strip(".")

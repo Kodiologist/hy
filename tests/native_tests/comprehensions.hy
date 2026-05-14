@@ -86,8 +86,7 @@
   (for [[expr answer] cases]
     ; Mutate the case as appropriate for the operator before
     ; evaluating it.
-    (setv expr (+ (hy.models.Expression
-                    [(hy.models.Symbol specialop)]) (cut expr 1 None)))
+    (setv expr `(~(hy.models.Symbol specialop) ~@(cut expr 1 None)))
     (when (= specialop "dfor")
       (+= expr `(1)))
     (when (= specialop "for")
@@ -112,6 +111,76 @@
   (assert (= (sfor 1) #{}))
   (assert (= (list (gfor 1)) []))
   (assert (= (dfor 1 2) {})))
+
+
+(defn test-unpack []
+
+  ; In true comprehensions. (Except on Pythons < 3.15, in which case
+  ; these have to be compiled as `for` loops anyway.)
+
+  (assert (=
+    (lfor  x [[1 2] [3 4] [5]]  #* x)
+    [1 2 3 4 5]))
+  (assert (=
+    (list (gfor  x [[1 2] [3 4] [5]]  #* x))
+    [1 2 3 4 5]))
+  (assert (=
+    (dfor  d [{"a" 1} {"b" 2} {"a" 3}]  #** d)
+    {"a" 3  "b" 2}))
+
+  ; In comprehensions compiled as `for` loops.
+
+  (setv l [])
+  (assert (=
+    (list (gfor
+      x [[1 2] [3 4] [5]]
+      :do (.append l (len x))
+      #* x))
+    [1 2 3 4 5]))
+  (assert (= l [2 2 1]))
+
+  (setv l [])
+  (assert (=
+    (dfor
+      x [{"a" 1} {"b" 2} {"a" 3}]
+      :do (.append l (next (iter x)))
+      #** x)
+    {"a" 3  "b" 2}))
+  (assert (= l ["a" "b" "a"])))
+
+
+(defn test-unpack-setx []
+  ; Adapted from https://peps.python.org/pep-0798/#interaction-with-assignment-expressions
+  (do-mac (lfor  statementize [False True]  `((fn []
+    (setv g (gfor
+      i [0 2 4]
+      ~@(when statementize '[:do (print "hi")])
+      #* (setx y [i (+ i 1)])))
+    (assert (not-in "y" (locals)))
+    (assert (= (next g) 0))
+    (assert (= y [0 1]))
+    (assert (= (next g) 1))
+    (assert (= y [0 1]))
+    (assert (= (next g) 2))
+    (assert (= y [2 3])))))))
+
+
+(defn test-unpack-loop-vs-yieldfrom []
+  ; PEP 798 says that the semantics of unpacking need to work like an
+  ; inner loop, not `yield from`.
+  ; This test is adapted from https://peps.python.org/pep-0798/#advanced-generator-protocol-differences
+  (do-mac (lfor  statementize [False True]  `(do
+    (defn sub_generator []
+      (setv x (yield "first"))
+      (yield f"received: {x}")
+      (yield "last"))
+    (setv g (gfor
+      f [sub_generator]
+      ~@(when statementize '[:do (print "foobar")])
+      #* (f)))
+    (assert (= (next g) "first"))
+    (assert (= (.send g "hello") "received: None"))
+    (assert (= (next g) "last"))))))
 
 
 (defn test-raise-in-comp []
