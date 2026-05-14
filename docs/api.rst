@@ -732,6 +732,11 @@ Comprehensions
    - ``:if CONDITION``, which is equivalent to ``:do (when (not CONDITION)
      (continue))``.
 
+   As of Hy 1.3, ``VALUE`` may be an :hy:func:`unpack-iterable` form,
+   such as ``#* ITERABLE``, in which case the elements of ``ITERABLE``
+   will be returned instead. This corresponds to a new feature in Python
+   3.15 (:pep:`798`), but Hy supports it on all Python versions.
+
    For ``lfor``, ``sfor``, ``gfor``, and ``dfor``,  variables defined by
    an iteration clause or ``:setv`` are not visible outside the form.
    However, variables defined within the body, as with a ``setx``
@@ -749,6 +754,12 @@ Comprehensions
         (dfor  x (range 5)  x (* x 10))
           ; => {0 0  1 10  2 20  3 30  4 40}
 
+    Alternatively, as of Hy 1.3, you may use an :hy:func:`unpack-mapping` form
+    as a single final argument to return all the items of the unpacked
+    mapping. ::
+
+        (dfor  x [{1 10  2 20} {3 30  4 40}]  #** x)
+          ; => {1 10  2 20  3 30  4 40}
 
 .. hy:macro:: (gfor [#* args])
 

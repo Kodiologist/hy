@@ -113,6 +113,42 @@
   (assert (= (dfor 1 2) {})))
 
 
+(defn test-unpack []
+
+  ; In true comprehensions. (Except on Pythons < 3.15, in which case
+  ; these have to be compiled as `for` loops anyway.)
+
+  (assert (=
+    (lfor  x [[1 2] [3 4] [5]]  #* x)
+    [1 2 3 4 5]))
+  (assert (=
+    (list (gfor  x [[1 2] [3 4] [5]]  #* x))
+    [1 2 3 4 5]))
+  (assert (=
+    (dfor  d [{"a" 1} {"b" 2} {"a" 3}]  #** d)
+    {"a" 3  "b" 2}))
+
+  ; In comprehensions compiled as `for` loops.
+
+  (setv l [])
+  (assert (=
+    (list (gfor
+      x [[1 2] [3 4] [5]]
+      :do (.append l (len x))
+      #* x))
+    [1 2 3 4 5]))
+  (assert (= l [2 2 1]))
+
+  (setv l [])
+  (assert (=
+    (dfor
+      x [{"a" 1} {"b" 2} {"a" 3}]
+      :do (.append l (next (iter x)))
+      #** x)
+    {"a" 3  "b" 2}))
+  (assert (= l ["a" "b" "a"])))
+
+
 (defn test-raise-in-comp []
   (defclass E [Exception] [])
   (setv l [])

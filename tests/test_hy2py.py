@@ -88,6 +88,8 @@ def assert_stuff(m):
     assert m.mydictcomp == dict(a="A", b="B", d="D", e="E")
     assert type(m.mygenexpr) is type(x for x in [1, 2, 3])
     assert list(itertools.islice(m.mygenexpr, 5)) == [1, 3, 1, 3, 1]
+    assert m.unpacking_listcomp == [7, 8, 9, 1, 2, 3]
+    assert m.unpacking_dictcomp == dict(a = 1, b = 2, c = 3)
 
     assert (m.unpacked1, m.repacked, m.unpacked2) == ("W", ["X", "Y"], "Z")
     assert m.chained1 == m.chained2 == m.chained3 == 77
