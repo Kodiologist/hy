@@ -165,6 +165,24 @@
     (assert (= y [2 3])))))))
 
 
+(defn test-unpack-loop-vs-yieldfrom []
+  ; PEP 798 says that the semantics of unpacking need to work like an
+  ; inner loop, not `yield from`.
+  ; This test is adapted from https://peps.python.org/pep-0798/#advanced-generator-protocol-differences
+  (do-mac (lfor  statementize [False True]  `(do
+    (defn sub_generator []
+      (setv x (yield "first"))
+      (yield f"received: {x}")
+      (yield "last"))
+    (setv g (gfor
+      f [sub_generator]
+      ~@(when statementize '[:do (print "foobar")])
+      #* (f)))
+    (assert (= (next g) "first"))
+    (assert (= (.send g "hello") "received: None"))
+    (assert (= (next g) "last"))))))
+
+
 (defn test-raise-in-comp []
   (defclass E [Exception] [])
   (setv l [])
