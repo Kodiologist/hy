@@ -503,11 +503,12 @@ def _string_in_node(string, node):
 
 class FString(Sequence):
     """
-    Represents a format string as an iterable collection of :class:`hy.models.String`
-    and :class:`hy.models.FComponent`. The design mimics :class:`ast.JoinedStr`.
+    Represents a format string or template string as an iterable collection of
+    :class:`hy.models.String` and :class:`hy.models.FComponent`. The design
+    mimics :class:`ast.JoinedStr`.
 
     :ivar brackets: As in :class:`hy.models.String`.
-    :ivar is_tstring: Whether this represents a template string rather than a format string.
+    :ivar is_tstring: Whether this represents a template string, rather than a format string.
     """
 
     _extra_kwargs = ("brackets", "is_tstring")
