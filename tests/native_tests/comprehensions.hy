@@ -149,6 +149,22 @@
   (assert (= l ["a" "b" "a"])))
 
 
+(defn test-unpack-setx []
+  ; Adapted from https://peps.python.org/pep-0798/#interaction-with-assignment-expressions
+  (do-mac (lfor  statementize [False True]  `((fn []
+    (setv g (gfor
+      i [0 2 4]
+      ~@(when statementize '[:do (print "hi")])
+      #* (setx y [i (+ i 1)])))
+    (assert (not-in "y" (locals)))
+    (assert (= (next g) 0))
+    (assert (= y [0 1]))
+    (assert (= (next g) 1))
+    (assert (= y [0 1]))
+    (assert (= (next g) 2))
+    (assert (= y [2 3])))))))
+
+
 (defn test-raise-in-comp []
   (defclass E [Exception] [])
   (setv l [])
