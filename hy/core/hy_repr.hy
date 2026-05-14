@@ -165,15 +165,16 @@
 (hy-repr-register [hy.models.Complex complex] (fn [x]
   (.replace (.replace (.strip (_base-repr x) "()") "inf" "Inf") "nan" "NaN")))
 
-(hy-repr-register [range slice]
-                  (fn [x]
-                    (setv op (. (type x) __name__))
-                    (defn r [attr] (hy.repr (getattr x attr)))
-                    (if (= x.step (if (is (type x) range) 1 None))
-                        (if (= x.start (if (is (type x) range) 0 None))
-                            f"({op} {(r "stop")})"
-                            f"({op} {(r "start")} {(r "stop")})")
-                        f"({op} {(r "start")} {(r "stop")} {(r "step")})")))
+(hy-repr-register [range slice] (fn [x]
+  (defn r [attr]
+    (hy-repr (getattr x attr)))
+  (.format "({})" (.join " " (+
+    [(. (type x) __name__)]
+    (if (= x.step (if (is (type x) range) 1 None))
+      (if (= x.start (if (is (type x) range) 0 None))
+          [(r "stop")]
+          [(r "start") (r "stop")])
+      [(r "start") (r "stop") (r "step")]))))))
 
 (hy-repr-register
   hy.models.FComponent
